@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-
+from parse import Parser 
 
 # log in using selenium driver to extract cookies which will be used in the remaining requests 
 def getCookies():
@@ -62,24 +62,47 @@ if __name__ == '__main__':
         headers = json.load(f)
     print(cookies)
     target_url = 'https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveSearchVal'
-    data = [
+    cci_payload = [
     ('i_user_type', 'S'),
     ('i_a_majors', '-'),
     ('i_a_gaols', '-'),
     ('i_empl_search', ''),
+    ('i_a_majors', 'B-TIMS'),
+    ('i_a_majors', 'CI-CI00'),
     ('i_a_majors', 'CI-CS'),
+    ('i_a_majors', 'CI-CST'),
+    ('i_a_majors', 'CI-DSCI'),
+    ('i_a_majors', 'CI-IMAT'),
+    ('i_a_majors', 'CI-ISYS'),
+    ('i_a_majors', 'CI-IT'),
+    ('i_a_majors', 'CI-SE'),
     ('i_jt_search', ''),
     ('i_wa_search', '0'),
     ('i_a_gaols', '-'),
     ]
     
-    with requests.session() as s:
-        response = s.post(
+    with requests.session() as sess:
+        response = sess.post(
             'https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveSearchVal', 
             cookies=cookies,
             headers=headers,
-            data=data, 
+            data=cci_payload, 
         )
+        # get initial page of job listings and instantiate parser object with that page
         print(response.text)
-    
+        initialPageParser = Parser(response.text)
+
+        # this determines how many job listings there are 
+        total_recs = initialPageParser.howManyJobs()
+        # display ALL listings on one page for parsing purposes
+        params = {
+        'i_user_type': 'S',
+        'i_total_recs': total_recs,
+        'i_recs_per_page': total_recs,
+        'i_curr_page': '1',
+        }
+        response2 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveList', params=params, verify=False)
+        with open('./Data/test.html', 'w') as f:
+            f.write(response2.text)
+        print(response2.text)
     
