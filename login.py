@@ -89,11 +89,11 @@ if __name__ == '__main__':
             data=cci_payload, 
         )
         # get initial page of job listings and instantiate parser object with that page
-        print(response.text)
-        initialPageParser = Parser(response.text)
+        parser = Parser(response.text)
 
-        # this determines how many job listings there are 
-        total_recs = initialPageParser.howManyJobs()
+        # determines how many job listings there are 
+        total_recs = parser.howManyJobs()
+
         # display ALL listings on one page for parsing purposes
         params = {
         'i_user_type': 'S',
@@ -102,7 +102,24 @@ if __name__ == '__main__':
         'i_curr_page': '1',
         }
         response2 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveList', params=params, verify=False)
+        
+        # get jobIDs 
+        parser.setDoc(response2.text)
+        jobIDs = parser.populateJobs()
+        with open('./Data/test.txt', 'w') as f:
+            for id in jobIDs:
+                f.write(str(id))
+                f.write('\n')
+        
+        # send request to view job page 
+        params = {
+            'i_user_type': 'S', 
+            'i_job_num': jobIDs[100],
+        }
+
+        response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
+        print('Job Response')
+        print(response3.text)
+        parser.setDoc(response3.text)
         with open('./Data/test.html', 'w') as f:
             f.write(response2.text)
-        print(response2.text)
-    
