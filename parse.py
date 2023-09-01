@@ -6,6 +6,7 @@ class Parser:
     def __init__(self, html_doc):
         self.soup = BeautifulSoup(html_doc, 'html.parser')
         self.__jobIDS = []
+        self.__evaluationURLs = []
 
     # returns value to send another request for all jobs to be displayed on one page 
     def howManyJobs(self):
@@ -23,8 +24,19 @@ class Parser:
                 self.__jobIDS.append(re.search("\(\d+\)", str(record)).group()[1:-1]) 
         return self.__jobIDS
 
+    def extractEvalURL(self):
+        # only select the first evaluation 
+        url = f"https://banner.drexel.edu/{self.soup.find('td', class_='ddlabel').a['href']}"
+        self.__evaluationURLs.append(url)
+
+    def getEvaluations(self):
+        return self.__evaluationURLs
+
+    def populateDatabase(self):
+        pass
+
 if __name__ == '__main__':
     with open('./Data/test.html', 'r') as f:
         parser = Parser(f)
-        jobs = parser.populateJobs()
-        print(jobs)
+        links = parser.getEvalURL()
+        print(links)

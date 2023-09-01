@@ -43,7 +43,7 @@ def getCookies():
             driver.switch_to.window(window_handle)
             break
     time.sleep(10)
-    print('GETTING COOKIES')
+    print('Getting cookies...')
     all_cookies = driver.get_cookies()
     cookies_dict = {}
     for cookie in all_cookies:
@@ -51,6 +51,7 @@ def getCookies():
 
     with open(os.getcwd() + '/Data/cookies.json', 'w') as f:
         json.dump(cookies_dict, f, indent=4)
+    print('Complete')
     return
 
 if __name__ == '__main__':
@@ -60,7 +61,6 @@ if __name__ == '__main__':
         cookies = json.load(f)
     with open(os.getcwd() + '/Data/headers.json', 'r') as f:
         headers = json.load(f)
-    print(cookies)
     target_url = 'https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveSearchVal'
     cci_payload = [
     ('i_user_type', 'S'),
@@ -106,6 +106,7 @@ if __name__ == '__main__':
         # get jobIDs 
         parser.setDoc(response2.text)
         jobIDs = parser.populateJobs()
+        print('Getting job IDs')
         with open('./Data/test.txt', 'w') as f:
             for id in jobIDs:
                 f.write(str(id))
@@ -116,10 +117,28 @@ if __name__ == '__main__':
             'i_user_type': 'S', 
             'i_job_num': jobIDs[100],
         }
+        # get job page (shows list of links to evaluations) 
 
+
+        # LEAVE COMMENTED FOR NOW  
+
+        # for id in jobIDs:
+        #     response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
+        #     parser.setDoc(response3.text)
+        #     parser.extractEvalURL()
+
+        # evaluationURLs = parser.getEvaluations()
+
+        # for url in evaluationURLs:
+        #     response4 = sess.get(url)
+        #     parser.setDoc(response4.text)
+
+        print(jobIDs[100])
         response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
-        print('Job Response')
-        print(response3.text)
         parser.setDoc(response3.text)
         with open('./Data/test.html', 'w') as f:
-            f.write(response2.text)
+            f.write(response3.text)
+
+        response4 = sess.get('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
+        with open('./Data/test2.html', 'w') as f:
+            f.write(response4.text)
