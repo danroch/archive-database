@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from parse import Parser 
 
+
 # log in using selenium driver to extract cookies which will be used in the remaining requests 
 def getCookies():
     chrome_options = Options()
@@ -115,7 +116,7 @@ if __name__ == '__main__':
         # send request to view job page 
         params = {
             'i_user_type': 'S', 
-            'i_job_num': jobIDs[100],
+            'i_job_num': jobIDs[110],
         }
         # get job page (shows list of links to evaluations) 
 
@@ -133,12 +134,15 @@ if __name__ == '__main__':
         #     response4 = sess.get(url)
         #     parser.setDoc(response4.text)
 
-        print(jobIDs[100])
+        print(jobIDs[110])
         response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
         parser.setDoc(response3.text)
         with open('./Data/test.html', 'w') as f:
             f.write(response3.text)
-
-        response4 = sess.get('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
+        
+        evaluation_url = parser.extractEvalURL()
+        print(evaluation_url)
+        print('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
+        response4 = sess.get(evaluation_url)
         with open('./Data/test2.html', 'w') as f:
             f.write(response4.text)
