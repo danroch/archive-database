@@ -107,16 +107,11 @@ if __name__ == '__main__':
         # get jobIDs 
         parser.setDoc(response2.text)
         jobIDs = parser.populateJobs()
-        print('Getting job IDs')
-        with open('./Data/test.txt', 'w') as f:
-            for id in jobIDs:
-                f.write(str(id))
-                f.write('\n')
         
         # send request to view job page 
         params = {
             'i_user_type': 'S', 
-            'i_job_num': jobIDs[110],
+            'i_job_num': jobIDs[500],
         }
         # get job page (shows list of links to evaluations) 
 
@@ -134,7 +129,7 @@ if __name__ == '__main__':
         #     response4 = sess.get(url)
         #     parser.setDoc(response4.text)
 
-        print(jobIDs[110])
+        print(jobIDs[500])
         response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
         parser.setDoc(response3.text)
         with open('./Data/test.html', 'w') as f:

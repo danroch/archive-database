@@ -40,21 +40,59 @@ class Parser:
             if paragraph.span != None:
                 if paragraph.span.text == 'Employer: ':
                     employer = paragraph.text
+                    #print(employer)
 
         spans = self.soup.find_all('span')
         for span in spans:
             if span.text == "Job's Type: ":
                 job_type = span.next_sibling.next_sibling.text
+                # print(job_type)
             if span.text == "Job's Length: ":
                 job_length = span.next_sibling.next_sibling.text
+                # print(job_length)
 
         main_table = self.soup.find('table', class_="borderland")
         rows = main_table.findChildren('tr')
+
         for row in rows:
             cells = row.findChildren('td')
             for cell in cells:
-                print(cell.text)
-                
+
+                if cell.text == "Division/Location/Company Description:":
+                    company_description = cell.parent.next_sibling.next_sibling.findChildren('td')[0].text
+
+                elif cell.text == "Position Description:":
+                    position_description = cell.parent.next_sibling.next_sibling.findChildren('td')[0].text
+
+                elif cell.text == "Recommended Qualifications: ":
+                    position_qualifications = cell.parent.next_sibling.next_sibling.findChildren('td')[0].text
+
+                elif cell.text.find('Majors') != -1:
+                    majors_list = [major.text for major in cell.find_all('span')[1:]]
+
+                # get experience level 
+                elif cell.text.find('Level(s)') != -1:
+                    levels = ['Beginner', 'Intermediate', 'Advanced']
+                    # only records lowest experience level  
+                    for level in levels:
+                        if cell.text.find(level) != -1: 
+                            lowest_experience = level
+                            break
+                    
+                elif cell.text.find('Position Address:') != -1:
+                    address = cell.text[len('Position Address:')+1:]
+
+
+                elif cell.text.find('Transportation to work:') != -1:
+                    transportation = cell.text[len('Transportation to work:')+1:]
+
+                elif cell.text.find('Approximate Hours Per Week:') != -1:
+                    hours = float(cell.text[len('Approximate Hours Per Week:')+1:])
+
+                elif cell.text.find('Minimum GPA: ') != -1: 
+                    minimum_gpa = float(cell.text[len('Minimum GPA: ')+1:])
+                    print(minimum_gpa)
+
 if __name__ == '__main__':
     with open('./Data/test2.html', 'r') as f:
         parser = Parser(f)
