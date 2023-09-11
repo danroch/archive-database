@@ -1,10 +1,11 @@
-import time, random, os, json, requests
+import time, random, os, json, requests, sqlite3, csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from parse import Parser 
 
+conn = sqlite3.connect('archive.db')
 
 # log in using selenium driver to extract cookies which will be used in the remaining requests 
 def getCookies():
@@ -108,36 +109,40 @@ if __name__ == '__main__':
         parser.setDoc(response2.text)
         jobIDs = parser.populateJobs()
         
-        # send request to view job page 
-        params = {
-            'i_user_type': 'S', 
-            'i_job_num': jobIDs[500],
-        }
+
         # get job page (shows list of links to evaluations) 
+        for id in jobIDs[:6]:
+            params = {
+            'i_user_type': 'S', 
+            'i_job_num': id,
+                }
+            response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
+            parser.setDoc(response3.text)
+            parser.extractEvalURL()
+            time.sleep(1)
+            print(f'Job ID:{id}')
 
+        evaluationURLs = parser.getEvaluations()
 
-        # LEAVE COMMENTED FOR NOW  
-
-        # for id in jobIDs:
-        #     response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
-        #     parser.setDoc(response3.text)
-        #     parser.extractEvalURL()
-
-        # evaluationURLs = parser.getEvaluations()
-
-        # for url in evaluationURLs:
-        #     response4 = sess.get(url)
-        #     parser.setDoc(response4.text)
-
-        print(jobIDs[500])
-        response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
-        parser.setDoc(response3.text)
-        with open('./Data/test.html', 'w') as f:
-            f.write(response3.text)
+        for url in evaluationURLs:
+            response4 = sess.get(url)
+            parser.setDoc(response4.text)
+            data = parser.relevantData()
+            with open('./Data/major.txt', 'a') as f:
+                for major in data['MAJOR']:
+                    f.write(major)
+                    f.write('\n')
         
-        evaluation_url = parser.extractEvalURL()
-        print(evaluation_url)
-        print('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
-        response4 = sess.get(evaluation_url)
-        with open('./Data/test2.html', 'w') as f:
-            f.write(response4.text)
+        # print(jobIDs[550])
+        # response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
+        # parser.setDoc(response3.text)
+        # with open('./Data/test.html', 'w') as f:
+        #     f.write(response3.text)
+        
+        # evaluation_url = parser.extractEvalURL()
+        # print(evaluation_url)
+        # print('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
+        # response4 = sess.get(evaluation_url)
+        # parser.setDoc(response4.text)
+        # with open('./Data/test2.html', 'w') as f:
+        #     f.write(response4.text)

@@ -1,4 +1,6 @@
 import sqlite3 
+import csv 
+
 
 conn = sqlite3.connect('archive.db')
 c = conn.cursor()
@@ -6,14 +8,16 @@ c = conn.cursor()
 # create major table
 query = (''' CREATE TABLE IF NOT EXISTS MAJOR
             (ID     INTEGER     PRIMARY KEY, 
-            NAME    TEXT        NOT NULL 
+            NAME    TEXT        NOT NULL, 
+            UNIQUE(NAME)
                 );''')
 c.execute(query)
 
 # create employer table
 query = (''' CREATE TABLE IF NOT EXISTS EMPLOYER
             (ID     INTEGER     PRIMARY KEY, 
-            NAME    TEXT        NOT NULL 
+            NAME    TEXT        NOT NULL, 
+            UNIQUE(NAME)
                 );''')
 c.execute(query)
 
@@ -54,3 +58,12 @@ query = (''' CREATE TABLE IF NOT EXISTS JOB_MAJOR
             FOREIGN KEY(MAJOR_ID) REFERENCES MAJOR(ID) 
                 );''')
 c.execute(query)
+
+# populate major database 
+with open('./Data/major.txt', 'r') as f:
+    for line in f.readlines():
+        c.execute(f"INSERT OR IGNORE INTO MAJOR (NAME) VALUES('{line}')")
+
+
+
+conn.commit()
