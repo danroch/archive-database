@@ -14,9 +14,11 @@ query = (''' CREATE TABLE IF NOT EXISTS MAJOR
 c.execute(query)
 
 # create employer table
-query = (''' CREATE TABLE IF NOT EXISTS EMPLOYER
-            (ID     INTEGER     PRIMARY KEY, 
-            NAME    TEXT        NOT NULL, 
+query = (''' CREATE         TABLE IF NOT EXISTS EMPLOYER
+            (ID             INTEGER     PRIMARY KEY, 
+            NAME            TEXT        NOT NULL, 
+            HIRING_OFFICE   TEXT,
+            DESCRIPTION     TEXT,  
             UNIQUE(NAME)
                 );''')
 c.execute(query)
@@ -64,6 +66,11 @@ with open('./Data/major.txt', 'r') as f:
     for line in f.readlines():
         c.execute(f"INSERT OR IGNORE INTO MAJOR (NAME) VALUES('{line}')")
 
-
-
+with open('./Data/employer.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        c.execute(
+                    "INSERT OR IGNORE INTO EMPLOYER (ID, NAME, HIRING_OFFICE, DESCRIPTION) VALUES (?, ?, ?, ?)",
+                    (row['ID'], row['NAME'], row['HIRING_OFFICE'], row['DESCRIPTION'])
+                )
 conn.commit()

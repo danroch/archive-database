@@ -111,7 +111,7 @@ if __name__ == '__main__':
         
 
         # get job page (shows list of links to evaluations) 
-        for id in jobIDs[:6]:
+        for id in jobIDs[:7]:
             params = {
             'i_user_type': 'S', 
             'i_job_num': id,
@@ -123,16 +123,29 @@ if __name__ == '__main__':
             print(f'Job ID:{id}')
 
         evaluationURLs = parser.getEvaluations()
+        
+        with open('./Data/employer.csv', 'w') as f:
+            employer_writer = csv.writer(f)
+            employer_writer.writerow(("ID","NAME","HIRING_OFFICE","DESCRIPTION"))
 
         for url in evaluationURLs:
             response4 = sess.get(url)
             parser.setDoc(response4.text)
             data = parser.relevantData()
+
             with open('./Data/major.txt', 'a') as f:
                 for major in data['MAJOR']:
                     f.write(major)
                     f.write('\n')
-        
+
+            with open('./Data/employer.csv', 'a') as f:
+                employer_writer = csv.writer(f)
+                employer_writer.writerow(data['EMPLOYER'])
+
+
+        with open('./Data/test2.html', 'w') as f:
+            f.write(response4.text)
+
         # print(jobIDs[550])
         # response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
         # parser.setDoc(response3.text)
@@ -144,5 +157,3 @@ if __name__ == '__main__':
         # print('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
         # response4 = sess.get(evaluation_url)
         # parser.setDoc(response4.text)
-        # with open('./Data/test2.html', 'w') as f:
-        #     f.write(response4.text)
