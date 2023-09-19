@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import re 
+import re, unicodedata
 
 class Parser:
     
@@ -64,18 +64,19 @@ class Parser:
             
         db_translation = {'Yes': 1, 'No': 0}
         lowest_experience = 'NULL'
+        other_compensation = 'NULL'
         for row in rows[1:]:
             cells = row.findChildren('td')
             for cell in cells:
                 if cell.text.find("Division/Location/Company Description:") != -1:
-                    company_description = cell.parent.next_sibling.next_sibling.findChildren('td')[0].text
+                    company_description = re.sub('(\n|\r)', '', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
 
                 elif cell.text.find("Position Description:") != -1:
-                    position_description = cell.parent.next_sibling.next_sibling.findChildren('td')[0].text
+                    position_description = re.sub('(\n|\r)', '', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
                 # qualifications 
                 elif cell.text.find("Recommended Qualifications: ") != -1:
-                    position_qualifications = cell.parent.next_sibling.next_sibling.findChildren('td')[0].text
-
+                    position_qualifications = re.sub('(\n|\r)', ' ', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
+                    
                 elif cell.text.find('Majors') != -1:
                     majors_list = [major.text.split(' - ')[1].strip(', ') for major in cell.find_all('span')[1:]]
 
@@ -91,10 +92,11 @@ class Parser:
                             lowest_experience = 'NULL'
     
                 elif cell.text.find('Position Address: ') != -1:
-                    address = cell.text[len('Position Address: '):]
+                    #address = cell.text[len('Position Address: '):]
+                    address = cell.get_text(separator=" ").strip()[len('Position Address:  '):]
 
                 elif cell.text.find('Job Location: ') != -1:
-                    address = cell.text[len('Job Location: ') + 1:]
+                    address = unicodedata.normalize('NFKD', cell.text[len('Job Location: '):])
                 # transportation 
                 elif cell.text.find('Transportation to work:') != -1:
                     transportation = cell.text[len('Transportation to work: '):]
@@ -105,9 +107,9 @@ class Parser:
                     
                 # anticipated travel information 
                 elif cell.text.find('Anticipated travel information: ') != -1:
-                    anticipated = cell.text[len('Anticipated travel information: '):]
-                    if len(anticipated) == 0:
-                        anticipated = 'NULL'
+                    travel_info = cell.text[len('Anticipated travel information: '):]
+                    if len(travel_info) == 0:
+                        travel_info = 'NULL'
                 # hrs/week
                 elif cell.text.find('Approximate Hours Per Week:') != -1:
                     try:
@@ -145,23 +147,23 @@ class Parser:
                         screening = 'NULL'
 
                 elif cell.text.find('Compensation Status: ') != -1:
-                    compensation_status = cell.text[len('Compensation Status: '):]
+                    compensation_status = re.sub('(\n|\r)', '', cell.text[len('Compensation Status: '):])
 
                 elif cell.text.find('Other Compensation: ') != -1:
-                    other_compensation = cell.text[len('Other Compensation: '):]
-                    if other_compensation == '- None -' or other_compensation == 'None':
+                    other_compensation = re.sub('(\n|\r)', '', cell.text[len('Other Compensation: '):]).strip()
+                    if other_compensation == '- None -' or other_compensation == 'None' or other_compensation == '':
                         other_compensation = 'NULL'
                 elif cell.text.find('Other Compensation Details: ') != -1:
                     other_compensation_details = cell.text[len('Other Compensation Details: '):]
-                    if other_compensation_details == '- None -' or other_compensation_details == 'None':
+                    if other_compensation_details == '- None -' or other_compensation_details == 'None' or other_compensation_details == ' ':
                         other_compensation_details = 'NULL'
         # return dictionary containing data to populate 1 row of each table
-        return {'MAJOR': (majors_list), 'EMPLOYER': (employer_id, employer_name, hiring_office_location, company_description), 'JOB': (job_id, job_name, job_type, job_length, \
+        return {'MAJOR': (majors_list), 'EMPLOYER': (employer_id, employer_name, hiring_office_location, company_description), 'JOB': (job_id, employer_id, job_name, job_type, job_length, \
             position_description, hazardous, research, third_party, position_qualifications, lowest_experience, address, transportation, \
-                travel_req, compensation_status, other_compensation, other_compensation_details, anticipated, hours, minimum_gpa, citizenship_restriction, screening)}
+                travel_req, travel_info, compensation_status, other_compensation, other_compensation_details, hours, minimum_gpa, citizenship_restriction, screening)}
 
+# for testing purposes
 if __name__ == '__main__':
     with open('./Data/test2.html', 'r') as f:
         parser = Parser(f)
         data = parser.relevantData()
-        print(data)

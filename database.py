@@ -61,11 +61,15 @@ query = (''' CREATE TABLE IF NOT EXISTS JOB_MAJOR
                 );''')
 c.execute(query)
 
-# populate major database 
-with open('./Data/major.txt', 'r') as f:
-    for line in f.readlines():
-        c.execute(f"INSERT OR IGNORE INTO MAJOR (NAME) VALUES('{line}')")
+# populate major table 
+with open('./Data/major.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        c.execute(
+            "INSERT OR IGNORE INTO MAJOR (ID, NAME) VALUES (?, ?)", (row['ID'], row['NAME'])
+        )
 
+# populate employer table
 with open('./Data/employer.csv', 'r') as f:
     reader = csv.DictReader(f)
     for row in reader:
@@ -73,4 +77,28 @@ with open('./Data/employer.csv', 'r') as f:
                     "INSERT OR IGNORE INTO EMPLOYER (ID, NAME, HIRING_OFFICE, DESCRIPTION) VALUES (?, ?, ?, ?)",
                     (row['ID'], row['NAME'], row['HIRING_OFFICE'], row['DESCRIPTION'])
                 )
+
+# populate job table 
+with open('./Data/job.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        c.execute(
+                    "INSERT OR IGNORE INTO JOB (ID, EMPLOYER_ID, JOB_NAME, TYPE, LENGTH, DESCRIPTION, HAZARDOUS, RESEARCH, \
+                    THIRD_PARTY, QUALIFICATIONS, EXPERIENCE, LOCATION, TRANSPORTATION, \
+                    TRAVEL, TRAVEL_INFO, COMPENSATION_STATUS, OTHER_COMPENSATION, DETAILS, HOURS, MINIMUM_GPA, CITIZENSHIP, SCREENING) \
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                    (row['ID'], row['EMPLOYER_ID'], row['JOB_NAME'], row['TYPE'], row['LENGTH'], row['DESCRIPTION'], row['HAZARDOUS'],
+                    row['RESEARCH'], row['THIRD_PARTY'], row['QUALIFICATIONS'], row['EXPERIENCE'], row['LOCATION'], row['TRANSPORTATION'],
+                    row['TRAVEL'], row['TRAVEL_INFO'], row['COMPENSATION_STATUS'], row['OTHER_COMPENSATION'], row['DETAILS'], row['HOURS'],
+                    row['MINIMUM_GPA'], row['CITIZENSHIP'], row['SCREENING'])
+                )       
+
+# populate job_major table
+with open('./Data/job_major.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        c.execute(
+            "INSERT OR IGNORE INTO JOB_MAJOR (JOB_ID, MAJOR_ID) VALUES (?, ?)", (row['JOB_ID'], row['MAJOR_ID'])
+        )
+
 conn.commit()

@@ -111,7 +111,7 @@ if __name__ == '__main__':
         
 
         # get job page (shows list of links to evaluations) 
-        for id in jobIDs[:7]:
+        for id in jobIDs[200:208]:
             params = {
             'i_user_type': 'S', 
             'i_job_num': id,
@@ -120,7 +120,7 @@ if __name__ == '__main__':
             parser.setDoc(response3.text)
             parser.extractEvalURL()
             time.sleep(1)
-            print(f'Job ID:{id}')
+            print(f'Job ID: {id}')
 
         evaluationURLs = parser.getEvaluations()
         
@@ -128,20 +128,59 @@ if __name__ == '__main__':
             employer_writer = csv.writer(f)
             employer_writer.writerow(("ID","NAME","HIRING_OFFICE","DESCRIPTION"))
 
+        with open('./Data/job.csv', 'w') as f:
+            job_writer = csv.writer(f)
+            job_writer.writerow(('ID', 'EMPLOYER_ID', 'JOB_NAME', 'TYPE', 'LENGTH', 'DESCRIPTION',
+                'HAZARDOUS', 'RESEARCH', 'THIRD_PARTY', 'QUALIFICATIONS', 'EXPERIENCE', 'LOCATION', 
+                'TRANSPORTATION', 'TRAVEL', 'TRAVEL_INFO', 'COMPENSATION_STATUS', 'OTHER_COMPENSATION', 
+                'DETAILS', 'HOURS', 'MINIMUM_GPA', 'CITIZENSHIP', 'SCREENING'))
+        
+        with open('./Data/job_major.csv', 'w') as f:
+            job_major_writer = csv.writer(f)
+            job_major_writer.writerow(('JOB_ID', 'MAJOR_ID'))
+
+        # addresses the issue that majors don't have inherent id like jobs and employers 
+        # does so by mapping each major to a particular id starting at 0
+        major_id = {}
+        
+
+        # iterate through each evaluation url 
+        counter = 0 
         for url in evaluationURLs:
             response4 = sess.get(url)
             parser.setDoc(response4.text)
             data = parser.relevantData()
-
-            with open('./Data/major.txt', 'a') as f:
-                for major in data['MAJOR']:
-                    f.write(major)
-                    f.write('\n')
+        
+            for major in data['MAJOR']:
+                # if the major is in the dictionary already, move on
+                # otherwise, if searching for major yields an error, create a new key value pair 
+                try:
+                    check = major_id[major] 
+                except:
+                    major_id[major] = counter
+                    counter += 1                
 
             with open('./Data/employer.csv', 'a') as f:
                 employer_writer = csv.writer(f)
                 employer_writer.writerow(data['EMPLOYER'])
 
+            with open('./Data/job.csv', 'a') as f:
+                job_writer = csv.writer(f)
+                job_writer.writerow(data['JOB'])
+
+            with open('./Data/job_major.csv', 'a') as f:
+                job_major_writer = csv.writer(f)
+                for major in data['MAJOR']:
+                    job_major_writer.writerow((data['JOB'][0], major_id[major]))
+
+        with open('./Data/major.csv', 'w') as f:
+            major_writer = csv.writer(f)
+            major_writer.writerow(('ID', 'NAME'))
+            for key in major_id:
+                major_writer.writerow((major_id[key], key))
+
+
+        print(major_id)
 
         with open('./Data/test2.html', 'w') as f:
             f.write(response4.text)
