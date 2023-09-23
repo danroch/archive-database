@@ -1,11 +1,10 @@
-import time, random, os, json, requests, sqlite3, csv
+import time, random, os, json, requests, csv, general_writer
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from parse import Parser 
 
-conn = sqlite3.connect('archive.db')
 
 # log in using selenium driver to extract cookies which will be used in the remaining requests 
 def getCookies():
@@ -90,13 +89,14 @@ if __name__ == '__main__':
             headers=headers,
             data=cci_payload, 
         )
+
         # get initial page of job listings and instantiate parser object with that page
         parser = Parser(response.text)
 
         # determines how many job listings there are 
         total_recs = parser.howManyJobs()
 
-        # display ALL listings on one page for parsing purposes
+        # display ALL listings on one page for easier scraping
         params = {
         'i_user_type': 'S',
         'i_total_recs': total_recs,
@@ -110,8 +110,8 @@ if __name__ == '__main__':
         jobIDs = parser.populateJobs()
         
 
-        # get job page (shows list of links to evaluations) 
-        for id in jobIDs[200:208]:
+        # get job page (shows list of links to job overviews) 
+        for id in jobIDs[0:5]:
             params = {
             'i_user_type': 'S', 
             'i_job_num': id,
@@ -124,75 +124,6 @@ if __name__ == '__main__':
 
         evaluationURLs = parser.getEvaluations()
         
-        with open('./Data/employer.csv', 'w') as f:
-            employer_writer = csv.writer(f)
-            employer_writer.writerow(("ID","NAME","HIRING_OFFICE","DESCRIPTION"))
-
-        with open('./Data/job.csv', 'w') as f:
-            job_writer = csv.writer(f)
-            job_writer.writerow(('ID', 'EMPLOYER_ID', 'JOB_NAME', 'TYPE', 'LENGTH', 'DESCRIPTION',
-                'HAZARDOUS', 'RESEARCH', 'THIRD_PARTY', 'QUALIFICATIONS', 'EXPERIENCE', 'LOCATION', 
-                'TRANSPORTATION', 'TRAVEL', 'TRAVEL_INFO', 'COMPENSATION_STATUS', 'OTHER_COMPENSATION', 
-                'DETAILS', 'HOURS', 'MINIMUM_GPA', 'CITIZENSHIP', 'SCREENING'))
+        # writes to employer.csv, errors.csv, job_major.csv, job.csv, and major.csv
+        general_writer.writeDB(sess=sess, overviewURLs=evaluationURLs, parser=parser)
         
-        with open('./Data/job_major.csv', 'w') as f:
-            job_major_writer = csv.writer(f)
-            job_major_writer.writerow(('JOB_ID', 'MAJOR_ID'))
-
-        # addresses the issue that majors don't have inherent id like jobs and employers 
-        # does so by mapping each major to a particular id starting at 0
-        major_id = {}
-        
-
-        # iterate through each evaluation url 
-        counter = 0 
-        for url in evaluationURLs:
-            response4 = sess.get(url)
-            parser.setDoc(response4.text)
-            data = parser.relevantData()
-        
-            for major in data['MAJOR']:
-                # if the major is in the dictionary already, move on
-                # otherwise, if searching for major yields an error, create a new key value pair 
-                try:
-                    check = major_id[major] 
-                except:
-                    major_id[major] = counter
-                    counter += 1                
-
-            with open('./Data/employer.csv', 'a') as f:
-                employer_writer = csv.writer(f)
-                employer_writer.writerow(data['EMPLOYER'])
-
-            with open('./Data/job.csv', 'a') as f:
-                job_writer = csv.writer(f)
-                job_writer.writerow(data['JOB'])
-
-            with open('./Data/job_major.csv', 'a') as f:
-                job_major_writer = csv.writer(f)
-                for major in data['MAJOR']:
-                    job_major_writer.writerow((data['JOB'][0], major_id[major]))
-
-        with open('./Data/major.csv', 'w') as f:
-            major_writer = csv.writer(f)
-            major_writer.writerow(('ID', 'NAME'))
-            for key in major_id:
-                major_writer.writerow((major_id[key], key))
-
-
-        print(major_id)
-
-        with open('./Data/test2.html', 'w') as f:
-            f.write(response4.text)
-
-        # print(jobIDs[550])
-        # response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
-        # parser.setDoc(response3.text)
-        # with open('./Data/test.html', 'w') as f:
-        #     f.write(response3.text)
-        
-        # evaluation_url = parser.extractEvalURL()
-        # print(evaluation_url)
-        # print('https://banner.drexel.edu/duprod/hwczkslib.P_StudentJobDisplay?i_user_type=S&i_job_num=416161&i_begin_term=202135&i_source=A&i_return=%2Fduprod%2Fhwczkfsea.P_StudentESaPArchiveJobDisplay%3Fi_user_type%3DS%26i_job_num%3D416161%26i_return%3D*SESAPAJD')
-        # response4 = sess.get(evaluation_url)
-        # parser.setDoc(response4.text)
