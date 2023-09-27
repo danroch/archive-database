@@ -1,4 +1,4 @@
-import time, random, os, json, requests, csv, general_writer
+import time, random, os, json, requests, writer
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -111,19 +111,27 @@ if __name__ == '__main__':
         
 
         # get job page (shows list of links to job overviews) 
-        for id in jobIDs[0:5]:
+        for id in jobIDs[0:2]:
+            time.sleep(1)
             params = {
             'i_user_type': 'S', 
             'i_job_num': id,
                 }
             response3 = sess.get('https://banner.drexel.edu/duprod/hwczkfsea.P_StudentESaPArchiveJobDisplay', params=params)
+
+            with open('./Data/test.html', 'w') as f:
+                f.write(response3.text)
+
             parser.setDoc(response3.text)
-            parser.extractEvalURL()
-            time.sleep(1)
+            parser.extract_URLs()
             print(f'Job ID: {id}')
 
+        # obtain overview and evaluation URLs 
+        overviewURLs = parser.getOverviews()
         evaluationURLs = parser.getEvaluations()
         
-        # writes to employer.csv, errors.csv, job_major.csv, job.csv, and major.csv
-        general_writer.writeDB(sess=sess, overviewURLs=evaluationURLs, parser=parser)
+        # write to csv file pertaining to job and employer overview tables 
+        #writer.overview_writer(sess=sess, overviewURLs=overviewURLs, parser=parser)
         
+        # write to csv file pertaining to evaluation table 
+        writer.evaluation_writer(sess=sess, evaluationURLs=evaluationURLs, parser=parser)

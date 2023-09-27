@@ -6,6 +6,7 @@ class Parser:
     def __init__(self, html_doc):
         self.soup = BeautifulSoup(html_doc, 'html.parser')
         self.__jobIDS = []
+        self.__overviewURLs = []
         self.__evaluationURLs = []
 
     # returns value to send another request for all jobs to be displayed on one page 
@@ -24,19 +25,24 @@ class Parser:
                 self.__jobIDS.append(re.search("\(\d+\)", str(record)).group()[1:-1]) 
         return self.__jobIDS
 
-    def extractEvalURL(self):
+    def extract_URLs(self):
         # only select the first evaluation 
         url = f"https://banner.drexel.edu{self.soup.find('td', class_='ddlabel').a['href']}"
-        self.__evaluationURLs.append(url)
-        return url 
+        self.__overviewURLs.append(url)
+
+        # select all evaluations
+        for extension in self.soup.find_all('td', class_="dddefault"):
+            url = f"https://banner.drexel.edu{extension.a['href']}" 
+            self.__evaluationURLs.append(url)
+
+    def getOverviews(self):
+        return self.__overviewURLs
 
     def getEvaluations(self):
         return self.__evaluationURLs
 
-
-    # given some html document, extract all needed information to add to the database
-    def relevantData(self):
-
+    # given some html document, extract all needed information to add to the database (with exception of evaluation db)
+    def overviewData(self):
         # get employer_id
         paragraphs = self.soup.find_all('p')
         for paragraph in paragraphs:
@@ -69,10 +75,10 @@ class Parser:
             cells = row.findChildren('td')
             for cell in cells:
                 if cell.text.find("Division/Location/Company Description:") != -1:
-                    company_description = re.sub('(\n|\r)', '', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
+                    company_description = re.sub('(\n|\r)', ' ', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
 
                 elif cell.text.find("Position Description:") != -1:
-                    position_description = re.sub('(\n|\r)', '', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
+                    position_description = re.sub('(\n|\r)', ' ', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
                 # qualifications 
                 elif cell.text.find("Recommended Qualifications: ") != -1:
                     position_qualifications = re.sub('(\n|\r)', ' ', cell.parent.next_sibling.next_sibling.findChildren('td')[0].text)
@@ -126,16 +132,22 @@ class Parser:
 
                 # hazardous
                 elif cell.text.find('hazard') != -1:
-                    hazardous = db_translation[cell.text[len('Exposure to hazardous and/or biohazardous materials: '):]]
-
+                    try:
+                        hazardous = db_translation[cell.text[len('Exposure to hazardous and/or biohazardous materials: '):]]
+                    except:
+                        hazardous = 0
                 # research position
                 elif cell.text.find('Research Position: ') != -1:
-                    research = db_translation[cell.text[len('Research Position: '):]]
-
+                    try:
+                        research = db_translation[cell.text[len('Research Position: '):]]
+                    except:
+                        research = 0 
                 # 3rd party
                 elif cell.text.find('Students are hired by a third-party employer: ') != -1:
-                    third_party = db_translation[cell.text[len('Students are hired by a third-party employer: '):]]
-                
+                    try:
+                        third_party = db_translation[cell.text[len('Students are hired by a third-party employer: '):]]
+                    except:
+                        third_party = 0
                 # citizenship restriction
                 elif cell.text.find('Citizenship Restriction: ') != -1:
                     citizenship_restriction = cell.text[len('Citizenship Restriction: '):]
@@ -162,8 +174,24 @@ class Parser:
             position_description, hazardous, research, third_party, position_qualifications, lowest_experience, address, transportation, \
                 travel_req, travel_info, compensation_status, other_compensation, other_compensation_details, hours, minimum_gpa, citizenship_restriction, screening)}
 
+    def evaluation_data(self):
+        tables = self.soup.find_all('table')
+        
+        # get job id of evaluation 
+        job_id = re.search("\(\d+\)", tables[5].findChildren('td')[-1].text).group()[1:-1]
+        # get terms of employment 
+        terms_of_employment = tables[5].findChildren('td')[1].text
+        # get which coop 
+        which_coop_table = tables[8]
+        divs = which_coop_table.find_all('div')[5:]
+        for count, div in enumerate(divs):
+            if div.text == 'X':
+                which_coop = count
+                break
+        # get department number
+        print(tables[9])
 # for testing purposes
 if __name__ == '__main__':
     with open('./Data/test2.html', 'r') as f:
         parser = Parser(f)
-        data = parser.relevantData()
+        parser.evaluation_data()
