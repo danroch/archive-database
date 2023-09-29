@@ -175,8 +175,9 @@ class Parser:
                 travel_req, travel_info, compensation_status, other_compensation, other_compensation_details, hours, minimum_gpa, citizenship_restriction, screening)}
 
     def evaluation_data(self):
+
         tables = self.soup.find_all('table')
-        
+
         # get job id of evaluation 
         job_id = re.search("\(\d+\)", tables[5].findChildren('td')[-1].text).group()[1:-1]
         # get terms of employment 
@@ -188,8 +189,51 @@ class Parser:
             if div.text == 'X':
                 which_coop = count
                 break
-        # get department number
-        print(tables[9])
+        
+        data_table = tables[9]
+        rows = data_table.findChildren('tr')
+        db_map = {'No': False, 'Yes': True, '-- Not Reported --': None}
+        count = 0 
+        for row in rows:
+            cells = row.findChildren('td')
+            for cell in cells:
+                if count == 1:
+                    try:
+                        department = db_map[cell.text.strip()]
+                    except:
+                        department = cell.text.strip()
+                elif count == 3:
+                    weekly_schedule = cell.text.strip()
+                elif count == 5:
+                    try:
+                        days_per_week = int(cell.text.strip())
+                    except:
+                        days_per_week = None
+                elif count == 7:
+                    stipend = cell.text.strip()
+                elif count == 9:
+                    transportation_assitance = cell.text.strip()
+                elif count == 11:
+                    meal_assitance = cell.text.strip()
+                elif count == 13:
+                    housing_assistance = cell.text.strip()
+                    print(housing_assistance)
+                elif count == 15:
+                    relocation_asstiance = cell.text.strip()
+                elif count == 17:
+                    # MUST CORRECT
+                    other = cell.text.strip()
+                elif count == 19:
+                    try:
+                        shiftwork_required = db_map[cell.text.strip()]
+                    except:
+                        shiftwork_required = None
+                # MUST CORRECT
+                elif count == 21:
+                    overtime_required = cell.text.strip()
+                elif count == 23:
+                    travel_out_of_town_purpose = cell.text.strip()
+                count += 1
 # for testing purposes
 if __name__ == '__main__':
     with open('./Data/test2.html', 'r') as f:
