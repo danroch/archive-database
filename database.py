@@ -61,6 +61,55 @@ query = (''' CREATE TABLE IF NOT EXISTS JOB_MAJOR
                 );''')
 c.execute(query)
 
+# create evaluation table and link with job (many to one relationship) 
+query = (''' CREATE TABLE IF NOT EXISTS EVALUATION
+            (ID                         INTEGER     PRIMARY_KEY, 
+            JOB_ID                      INTEGER     NOT NULL,
+            TERMS_OF_EMPLOYMENT         TEXT, 
+            WHICH_COOP                  INTEGER, 
+            DEPARTMENT                  TEXT, 
+            WEEKLY_SCHEDULE             TEXT, 
+            DAYS_PER_WEEK               INTEGER, 
+            STIPEND                     TEXT, 
+            TRANSPORTATION_ASSISTANCE   TEXT, 
+            MEAL_ASSISTANCE             TEXT, 
+            HOUSING_ASSISTANCE          TEXT, 
+            RELOCATION_ASSISTANCE       TEXT,
+            OTHER_INFORMATION           TEXT, 
+            WAS_SHIFT_WORK_REQUIRED     INTEGER,
+            OVERTIME_REQUIRED           INTEGER, 
+            OVERTIME_HOURS              INTEGER,
+            TRAVEL_PURPOSE              TEXT, 
+            PUBLIC_TRANSPORT_ACCESS     INTEGER,
+            NON_PHILLY_HOUSING_ARRANGE  TEXT, 
+            COLLABORATION               INTEGER, 
+            QUANTITY_AND_VARIETY        INTEGER, 
+            FORM_MEANINGFUL_RELATIONS   INTEGER, 
+            SUPERVISOR_ACCESS           INTEGER, 
+            TRAINING                    INTEGER, 
+            JOB_SATISFACTION            INTEGER, 
+            RECOMMEND_TO_FRIEND         INTEGER, 
+            ACCURATE_DESCRIPTION        INTEGER, 
+            EXPLAIN_IF_NOT_ACCURATE     TEXT, 
+            BEST_FEATURES               TEXT, 
+            DRAWBACKS                   TEXT, 
+            DESCRIBE_ON_RESUME          TEXT, 
+            WRITTEN_COMMUNICATION       INTEGER, 
+            VERBAL_COMMUNICATION        INTEGER, 
+            ADJUSTING_STYLE             INTEGER, 
+            CONTRIBUTING_IDEAS          INTEGER, 
+            COMPLEX_PROBLEM_SOLVING     INTEGER, 
+            EVALUATING_REL_INFO         INTEGER, 
+            GOOD_DECISIONS              INTEGER, 
+            ETHICAL_STANDARDS           INTEGER, 
+            APPROPRIATE_TECHNOLOGY      INTEGER, 
+            GOALS_AND_PROGRESS          INTEGER, 
+            DIVERSE_BACKGROUND          INTEGER, 
+            EFFECTIVE_WORK_HABITS       INTEGER, 
+            PROACTIVE_SOLVING           INTEGER,        
+            FOREIGN KEY(JOB_ID) REFERENCES JOB(ID),
+            );''')
+
 # populate major table 
 with open('./Data/major.csv', 'r') as f:
     reader = csv.DictReader(f)
