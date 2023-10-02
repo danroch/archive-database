@@ -81,6 +81,7 @@ query = (''' CREATE TABLE IF NOT EXISTS EVALUATION
             OVERTIME_HOURS              INTEGER,
             TRAVEL_PURPOSE              TEXT, 
             PUBLIC_TRANSPORT_ACCESS     INTEGER,
+            EMPLOYER_ASSISTED_HOUSING   TEXT,
             NON_PHILLY_HOUSING_ARRANGE  TEXT, 
             COLLABORATION               INTEGER, 
             QUANTITY_AND_VARIETY        INTEGER, 

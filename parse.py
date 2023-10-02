@@ -175,7 +175,6 @@ class Parser:
                 travel_req, travel_info, compensation_status, other_compensation, other_compensation_details, hours, minimum_gpa, citizenship_restriction, screening)}
 
     def evaluation_data(self):
-
         tables = self.soup.find_all('table')
 
         # get job id of evaluation 
@@ -190,50 +189,231 @@ class Parser:
                 which_coop = count
                 break
         
-        data_table = tables[9]
-        rows = data_table.findChildren('tr')
+        employment_information_table = tables[9]
+        rows = employment_information_table.findChildren('tr')
         db_map = {'No': False, 'Yes': True, '-- Not Reported --': None}
         count = 0 
         for row in rows:
             cells = row.findChildren('td')
             for cell in cells:
+                print(f'{count} : {cell.text.strip()}')
                 if count == 1:
                     try:
                         department = db_map[cell.text.strip()]
                     except:
                         department = cell.text.strip()
                 elif count == 3:
-                    weekly_schedule = cell.text.strip()
+                    try:
+                        weekly_schedule = db_map[cell.text.strip()]
+                    except:
+                        weekly_schedule = cell.text.strip()
                 elif count == 5:
                     try:
                         days_per_week = int(cell.text.strip())
                     except:
                         days_per_week = None
                 elif count == 7:
-                    stipend = cell.text.strip()
+                    try:
+                        stipend = db_map[cell.text.strip()]
+                    except:
+                        stipend = cell.text.strip()
                 elif count == 9:
-                    transportation_assitance = cell.text.strip()
+                    try:
+                        transportation_assistance = db_map[cell.text.strip()]
+                    except:
+                        transportation_assistance = cell.text.strip()
                 elif count == 11:
-                    meal_assitance = cell.text.strip()
+                    try:
+                        meal_assitance = db_map[cell.text.strip()]
+                    except:
+                        meal_assitance = cell.text.strip()
                 elif count == 13:
-                    housing_assistance = cell.text.strip()
-                    print(housing_assistance)
+                    try:
+                        housing_assistance = db_map[cell.text.strip()]
+                    except:
+                        housing_assistance = cell.text.strip()
                 elif count == 15:
-                    relocation_asstiance = cell.text.strip()
+                    try:
+                        relocation_assistance = db_map[cell.text.strip()]
+                    except:
+                        relocation_assistance = cell.text.strip()
                 elif count == 17:
-                    # MUST CORRECT
-                    other = cell.text.strip()
-                elif count == 19:
+                    try:
+                        other = db_map[cell.text.strip()]
+                    except:
+                        other = cell.text.strip()
+                elif count == 21:
                     try:
                         shiftwork_required = db_map[cell.text.strip()]
                     except:
                         shiftwork_required = None
                 # MUST CORRECT
-                elif count == 21:
-                    overtime_required = cell.text.strip()
                 elif count == 23:
-                    travel_out_of_town_purpose = cell.text.strip()
+                    try:
+                        overtime_required = db_map[cell.text.strip()]
+                    except:
+                        overtime_required = cell.text.strip()
+                elif count == 25:
+                    try:
+                        overtime_hours = db_map[cell.text.strip()[len('If yes, how many hours per week? '):]]
+                    except:
+                        overtime_hours = int(cell.text.strip()[len('If yes, how many hours per week? '):])
+                elif count == 27:
+                    try:
+                        travel_out_of_town_purpose = db_map[cell.text.strip()]
+                    except:
+                        travel_out_of_town_purpose = cell.text.strip()
+                elif count == 29:
+                    try:
+                        public_transport_available = db_map[cell.text.strip()]
+                    except:
+                        public_transport_available = None
+                elif count == 31:
+                    try:
+                        employer_assisted_housing = db_map[cell.text.strip()]
+                    except:
+                        employer_assisted_housing = None
+                elif count == 33:
+                    try:
+                        wish_to_share_housing_information = db_map[cell.text.strip()]
+                    except:
+                        wish_to_share_housing_information = cell.text.strip()
                 count += 1
+    
+        job_evaluation_table = tables[12]
+        rows = job_evaluation_table.findChildren('tr')
+        # rating will be stored as integer 
+        # 1: very satisfied; 2: satisfied; 3 dissatisfied; 4 very dissatisfied;
+        count = 0 
+        for row in rows:
+            cells = row.findChildren('td')
+            for cell in cells:
+                if 7 <= count <= 10 and cell.text == 'X':
+                    ability_to_collaborate = count % 6
+                elif 13 <= count <= 16 and cell.text == 'X':
+                    quantity_and_variety = count % 6
+                elif 19 <= count <= 22 and cell.text == 'X':
+                    meaningful_professional_relationships = count % 6
+                elif 25 <= count <= 28 and cell.text == 'X':
+                    access_to_supervisor = count % 6
+                elif 31 <= count <= 34 and cell.text == 'X':
+                    training_provided = count % 6
+                elif 37 <= count <= 40 and cell.text == 'X':
+                    overall_job_satisfaction = count % 6 
+                elif count == 43:
+                    try: 
+                        recommend_to_friend = db_map[cell.text.strip()]
+                    except:
+                        recommend_to_friend = None
+                elif count == 45:
+                    try:
+                        accurate_description = db_map[cell.text.strip()]
+                    except:
+                        accurate_description = None
+                elif count == 47:
+                    try:
+                        explain_if_not = db_map[cell.text.strip()]
+                    except:
+                        explain_if_not = cell.text.strip()
+                elif count == 49:
+                    try:
+                        best_feature = db_map[cell.text.strip()]
+                    except:
+                        best_feature = cell.text.strip()
+                elif count == 51:
+                    try:
+                        challenges_drawbacks = db_map[cell.text.strip()]
+                    except:
+                        challenges_drawbacks = cell.text.strip()
+                elif count == 53:
+                    try:
+                        describe_on_resume = db_map[cell.text.strip()]
+                    except:
+                        describe_on_resume = cell.text.strip()                        
+                count += 1
+        # final table 
+        career_competencies_table = tables[15]
+        rows = career_competencies_table.findChildren('tr')
+        # confusing but it's just an html parser don't worry about it
+        db_map = {1 : 4, 2 : 3, 3 : 2, 4 : 1}
+        count = 0
+        for row in rows:
+            cells = row.findChildren('td')
+            for cell in cells:
+                if 7 <= count <= 10 and cell.text == 'X':
+                    written_communication = db_map[count % 6]
+                elif 13 <= count <= 16 and cell.text == 'X':
+                    verbal_communication = db_map[count % 6]
+                elif 19 <= count <= 22 and cell.text == 'X':
+                    adjusting_communication_style = db_map[count % 6]
+                elif 25 <= count <= 28 and cell.text == 'X':
+                    contributing_original_and_relevant = db_map[count % 6]
+                elif 31 <= count <= 34 and cell.text == 'X':
+                    critical_analysis = db_map[count % 6]
+                elif 37 <= count <= 40 and cell.text == 'X':
+                    accessing_relevant_information = db_map[count % 6]
+                elif 43 <= count <= 46 and cell.text == 'X':
+                    making_good_decisions = db_map[count % 6]
+                elif 49 <= count <= 52 and cell.text == 'X':
+                    upholding_ethical_standards = db_map[count % 6]
+                elif 55 <= count <= 58 and cell.text == 'X':
+                    appropriate_use_of_tech = db_map[count % 6]
+                elif 61 <= count <= 64 and cell.text == 'X':
+                    setting_goals = db_map[count % 6]
+                elif 67 <= count <= 70 and cell.text == 'X':
+                    diverse_backgrounds = db_map[count % 6]
+                elif 73 <= count <= 76 and cell.text == 'X':
+                    effective_work_habits = db_map[count % 6]
+                elif 79 <= count <= 82 and cell.text == 'X':
+                    proactively_addressing_issues = db_map[count % 6]
+                count += 1
+        return (
+            job_id, 
+            terms_of_employment, 
+            which_coop,
+            department, 
+            weekly_schedule, 
+            days_per_week, 
+            stipend,
+            transportation_assistance,
+            meal_assitance,
+            housing_assistance,
+            relocation_assistance,
+            other,
+            shiftwork_required,
+            overtime_required,
+            overtime_hours,
+            travel_out_of_town_purpose, 
+            public_transport_available,
+            employer_assisted_housing,
+            wish_to_share_housing_information,
+            ability_to_collaborate,
+            quantity_and_variety,
+            meaningful_professional_relationships,
+            access_to_supervisor,
+            training_provided,
+            overall_job_satisfaction,
+            recommend_to_friend,
+            accurate_description,
+            explain_if_not,
+            best_feature,
+            challenges_drawbacks,
+            describe_on_resume,
+            written_communication,
+            verbal_communication,
+            adjusting_communication_style,
+            contributing_original_and_relevant,
+            critical_analysis,
+            accessing_relevant_information,
+            making_good_decisions,
+            upholding_ethical_standards,
+            appropriate_use_of_tech,
+            setting_goals,
+            diverse_backgrounds,
+            effective_work_habits,
+            proactively_addressing_issues
+        )
+
 # for testing purposes
 if __name__ == '__main__':
     with open('./Data/test2.html', 'r') as f:

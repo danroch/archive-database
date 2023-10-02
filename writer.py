@@ -86,14 +86,14 @@ def evaluation_writer(sess, evaluationURLs, parser):
     
     with open('./Data/evaluation.csv', 'w') as f:
         evaluation_write = csv.writer(f)
-        evaluation_write.writerow('ID', 'JOB_ID', 'TERMS_OF_EMPLOYMENT', 'WHICH_COOP', 'DEPARTMENT', 'WEEKLY_SCHEDULE', 
+        evaluation_write.writerow(('ID', 'JOB_ID', 'TERMS_OF_EMPLOYMENT', 'WHICH_COOP', 'DEPARTMENT', 'WEEKLY_SCHEDULE', 
             'DAYS_PER_WEEK', 'STIPEND', 'TRANSPORTATION_ASSISTANCE', 'MEAL_ASSISTANCE', 'HOUSING_ASSISTANCE', 'RELOCATION_ASSISTANCE', 
             'OTHER_INFORMATION', 'WAS_SHIFT_WORK_REQUIRED', 'OVERTIME_REQUIRED', 'OVERTIME_HOURS', 'TRAVEL_PURPOSE', 'PUBLIC_TRANSPORT_ACCESS', 
-            'NON_PHILLY_HOUSING_ARRANGE', 'COLLABORATION', 'QUANTITY_AND_VARIETY', 'FORM_MEANINGFUL_RELATIONS', 'SUPERVISOR_ACCESS', 
+            'EMPLOYER_ASSISTED_HOUSING', 'NON_PHILLY_HOUSING_ARRANGE', 'COLLABORATION', 'QUANTITY_AND_VARIETY', 'FORM_MEANINGFUL_RELATIONS', 'SUPERVISOR_ACCESS', 
             'TRAINING', 'JOB_SATISFACTION', 'RECOMMEND_TO_FRIEND', 'ACCURATE_DESCRIPTION', 'EXPLAIN_IF_NOT_ACCURATE', 'BEST_FEATURES', 
             'DRAWBACKS', 'DESCRIBE_ON_RESUME', 'WRITTEN_COMMUNICATION', 'VERBAL_COMMUNICATION', 'ADJUSING_STYLE', 'CONTRIBUTING_IDEAS', 
             'COMPLEX_PROBLEM_SOLVING', 'EVALUATING_REL_INFO', 'GOOD_DECISIONS', 'ETHICAL_STANDARDS', 'APPROPRIATE_TECHNOLOGY', 
-            'GOALS_AND_PROGRESS', 'DIVERSE_BACKGROUND', 'EFFECTIVE_WORK_HABITS', 'PROACTIVE_SOLVING')
+            'GOALS_AND_PROGRESS', 'DIVERSE_BACKGROUND', 'EFFECTIVE_WORK_HABITS', 'PROACTIVE_SOLVING'))
 
     
     with open('./Data/evaluation_errors.csv', 'w') as f:
@@ -112,8 +112,13 @@ def evaluation_writer(sess, evaluationURLs, parser):
         
         try:
             data = parser.evaluation_data()
+            print(data)
+
         except Exception as e:
             with open('./Data/evaluation_errors.csv', 'a') as f:
                 error_writer = csv.writer(f)
                 error_writer.writerow(url, e)
-
+        
+        with open('./Data/evaluation.csv', 'a') as f:
+            eval_writer = csv.writer(f)
+            eval_writer.writerow(data)
