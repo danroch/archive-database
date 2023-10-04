@@ -131,7 +131,7 @@ if __name__ == '__main__':
         evaluationURLs = parser.getEvaluations()
         
         # write to csv file pertaining to job and employer overview tables 
-        #writer.overview_writer(sess=sess, overviewURLs=overviewURLs, parser=parser)
+        writer.overview_writer(sess=sess, overviewURLs=overviewURLs, parser=parser)
         
         # write to csv file pertaining to evaluation table 
         writer.evaluation_writer(sess=sess, evaluationURLs=evaluationURLs, parser=parser)

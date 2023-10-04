@@ -34,7 +34,7 @@ def overview_writer(sess, overviewURLs, parser):
     # iterate through each overview url 
     counter = 1
     for url in overviewURLs:
-        print(f'URL REQUESTED: {url}')
+        print(f'OVERVIEW URL REQUESTED: {url}')
         time.sleep(1)
         response4 = sess.get(url)
         
@@ -91,7 +91,7 @@ def evaluation_writer(sess, evaluationURLs, parser):
             'OTHER_INFORMATION', 'WAS_SHIFT_WORK_REQUIRED', 'OVERTIME_REQUIRED', 'OVERTIME_HOURS', 'TRAVEL_PURPOSE', 'PUBLIC_TRANSPORT_ACCESS', 
             'EMPLOYER_ASSISTED_HOUSING', 'NON_PHILLY_HOUSING_ARRANGE', 'COLLABORATION', 'QUANTITY_AND_VARIETY', 'FORM_MEANINGFUL_RELATIONS', 'SUPERVISOR_ACCESS', 
             'TRAINING', 'JOB_SATISFACTION', 'RECOMMEND_TO_FRIEND', 'ACCURATE_DESCRIPTION', 'EXPLAIN_IF_NOT_ACCURATE', 'BEST_FEATURES', 
-            'DRAWBACKS', 'DESCRIBE_ON_RESUME', 'WRITTEN_COMMUNICATION', 'VERBAL_COMMUNICATION', 'ADJUSING_STYLE', 'CONTRIBUTING_IDEAS', 
+            'DRAWBACKS', 'DESCRIBE_ON_RESUME', 'WRITTEN_COMMUNICATION', 'VERBAL_COMMUNICATION', 'ADJUSTING_STYLE', 'CONTRIBUTING_IDEAS', 
             'COMPLEX_PROBLEM_SOLVING', 'EVALUATING_REL_INFO', 'GOOD_DECISIONS', 'ETHICAL_STANDARDS', 'APPROPRIATE_TECHNOLOGY', 
             'GOALS_AND_PROGRESS', 'DIVERSE_BACKGROUND', 'EFFECTIVE_WORK_HABITS', 'PROACTIVE_SOLVING'))
 
@@ -100,8 +100,9 @@ def evaluation_writer(sess, evaluationURLs, parser):
         error_writer = csv.writer(f)
         error_writer.writerow(('JOB_ID', 'ERROR'))
 
+    evaluation_primary_key = 0 
     for url in evaluationURLs:
-        print(f'URL REQUESTED: {url}')
+        print(f'EVALUATION URL REQUESTED: {url}')
         time.sleep(1)
         response4 = sess.get(url)
         parser.setDoc(response4.text)
@@ -112,7 +113,7 @@ def evaluation_writer(sess, evaluationURLs, parser):
         
         try:
             data = parser.evaluation_data()
-            print(data)
+            data.insert(0, evaluation_primary_key)
 
         except Exception as e:
             with open('./Data/evaluation_errors.csv', 'a') as f:
@@ -122,3 +123,4 @@ def evaluation_writer(sess, evaluationURLs, parser):
         with open('./Data/evaluation.csv', 'a') as f:
             eval_writer = csv.writer(f)
             eval_writer.writerow(data)
+        evaluation_primary_key += 1 
