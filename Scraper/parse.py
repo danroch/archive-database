@@ -366,7 +366,7 @@ class Parser:
                 elif 79 <= count <= 82 and cell.text == 'X':
                     proactively_addressing_issues = db_map[count % 6]
                 count += 1
-        return [
+        return (
             job_id, 
             terms_of_employment, 
             which_coop,
@@ -411,7 +411,7 @@ class Parser:
             diverse_backgrounds,
             effective_work_habits,
             proactively_addressing_issues
-        ]
+        )
 
 # for testing purposes
 if __name__ == '__main__':

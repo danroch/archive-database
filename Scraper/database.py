@@ -2,7 +2,7 @@ import sqlite3
 import csv 
 
 
-conn = sqlite3.connect('archive.db')
+conn = sqlite3.connect('./Data/archive.db')
 c = conn.cursor()
 
 # create major table
@@ -63,7 +63,7 @@ c.execute(query)
 
 # create evaluation table and link with job (many to one relationship) 
 query = (''' CREATE TABLE IF NOT EXISTS EVALUATION
-            (ID                         INTEGER     PRIMARY_KEY, 
+            (ID                         INTEGER     PRIMARY KEY, 
             JOB_ID                      INTEGER     NOT NULL,
             TERMS_OF_EMPLOYMENT         TEXT, 
             WHICH_COOP                  INTEGER, 
@@ -157,7 +157,7 @@ with open('./Data/evaluation.csv', 'r') as f:
     reader = csv.DictReader(f)
     for row in reader:
         c.execute(
-            "INSERT OR IGNORE INTO EVALUATION (ID, JOB_ID, TERMS_OF_EMPLOYMENT, WHICH_COOP, DEPARTMENT, WEEKLY_SCHEDULE, \
+            "INSERT OR IGNORE INTO EVALUATION (JOB_ID, TERMS_OF_EMPLOYMENT, WHICH_COOP, DEPARTMENT, WEEKLY_SCHEDULE, \
             DAYS_PER_WEEK, STIPEND, TRANSPORTATION_ASSISTANCE, MEAL_ASSISTANCE, HOUSING_ASSISTANCE, RELOCATION_ASSISTANCE, \
             OTHER_INFORMATION, WAS_SHIFT_WORK_REQUIRED, OVERTIME_REQUIRED, OVERTIME_HOURS, TRAVEL_PURPOSE, PUBLIC_TRANSPORT_ACCESS, \
             EMPLOYER_ASSISTED_HOUSING, NON_PHILLY_HOUSING_ARRANGE, COLLABORATION, QUANTITY_AND_VARIETY, FORM_MEANINGFUL_RELATIONS, SUPERVISOR_ACCESS, \
@@ -165,8 +165,8 @@ with open('./Data/evaluation.csv', 'r') as f:
             DRAWBACKS, DESCRIBE_ON_RESUME, WRITTEN_COMMUNICATION, VERBAL_COMMUNICATION, ADJUSTING_STYLE, CONTRIBUTING_IDEAS, \
             COMPLEX_PROBLEM_SOLVING, EVALUATING_REL_INFO, GOOD_DECISIONS, ETHICAL_STANDARDS, APPROPRIATE_TECHNOLOGY, \
             GOALS_AND_PROGRESS, DIVERSE_BACKGROUND, EFFECTIVE_WORK_HABITS, PROACTIVE_SOLVING) \
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (row['ID'], row['JOB_ID'], row['TERMS_OF_EMPLOYMENT'], row['WHICH_COOP'], row['DEPARTMENT'], row['WEEKLY_SCHEDULE'],
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (row['JOB_ID'], row['TERMS_OF_EMPLOYMENT'], row['WHICH_COOP'], row['DEPARTMENT'], row['WEEKLY_SCHEDULE'],
             row['DAYS_PER_WEEK'], row['STIPEND'], row['TRANSPORTATION_ASSISTANCE'], row['MEAL_ASSISTANCE'], row['HOUSING_ASSISTANCE'],
             row['RELOCATION_ASSISTANCE'], row['OTHER_INFORMATION'], row['WAS_SHIFT_WORK_REQUIRED'], row['OVERTIME_REQUIRED'],
             row['OVERTIME_HOURS'], row['TRAVEL_PURPOSE'], row['PUBLIC_TRANSPORT_ACCESS'], row['EMPLOYER_ASSISTED_HOUSING'], row['NON_PHILLY_HOUSING_ARRANGE'],

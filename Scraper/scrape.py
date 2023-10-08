@@ -111,7 +111,7 @@ if __name__ == '__main__':
         
 
         # get job page (shows list of links to job overviews) 
-        for id in jobIDs[0:3]:
+        for id in jobIDs[400:405]:
             time.sleep(1)
             params = {
             'i_user_type': 'S', 
