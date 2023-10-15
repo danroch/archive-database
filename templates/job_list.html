@@ -1,22 +1,10 @@
-{% block title %}
-List All Jobs
-{% endblock %}
-{% block content %}
-<table border="1px">
-    <thead>
-        <td><strong>Job ID</strong></td>
-        <td><strong>Job Name</strong></td>
-    </thead>
+{% extends 'base.html' %}
 
-    {% for row in rows %}
-    <tr>
-        <td>{{ row["ID"] }}</td>
-        <td>{{ row["JOB_NAME"] }}</td>
-        <td>{{ row["TYPE"] }}</td>
-        <td>{{ row["LENGTH"] }}</td>
-        <td>{{ row["DESCRIPTION"] }}</td>
-        <td>{{ row["QUALIFICATIONS"] }}</td>
-    </tr>
+{% block content %}
+<h1>Job List</h1>
+<ul>
+    {% for job in rows %}
+    <li><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.JOB_NAME }}</a></li>
     {% endfor %}
-</table>
+</ul>
 {% endblock %}
