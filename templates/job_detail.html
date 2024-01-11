@@ -2,11 +2,15 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="my-4">{{ job.title }}</h1>
+    <h1 class="my-4">{{ job.job_name }}</h1>
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Job Details</h5>
             <p class="card-text">{{ job.description }}</p>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Qualifications</h5>
+            <p class="card-text">{{ job.qualifications }}</p>
         </div>
     </div>
     <a href="{{ url_for('job_list') }}" class="btn btn-primary mt-4">Back to Job List</a>
